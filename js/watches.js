@@ -32,9 +32,24 @@ const WatchTool = (function () {
     return '#' + [dr, dg, db].map(v => v.toString(16).padStart(2, '0')).join('');
   }
 
+  const WATCH_PANE_NAME = 'watchesPane';
+
   async function init(leafletMap) {
     map = leafletMap;
     await AdminRegions.init();
+
+    // Se crea un "pane" (capa Z) dedicado para las vigilancias, con un
+    // z-index menor al del overlayPane por defecto (donde Leaflet dibuja
+    // los límites provinciales/departamentales de boundaries.js). Así las
+    // áreas pintadas por la herramienta de Vigilancia SIEMPRE quedan por
+    // debajo de esos límites —sin importar en qué orden se agreguen al
+    // mapa—, permitiendo ver claramente qué departamentos están afectados
+    // en vez de que su contorno fino quede tapado por el relleno de color.
+    if (!map.getPane(WATCH_PANE_NAME)) {
+      map.createPane(WATCH_PANE_NAME);
+      map.getPane(WATCH_PANE_NAME).style.zIndex = 350; // overlayPane = 400, tilePane = 200
+      map.getPane(WATCH_PANE_NAME).style.pointerEvents = 'auto';
+    }
   }
 
   function setActive(v) {
@@ -69,6 +84,7 @@ const WatchTool = (function () {
   function paintRegion(region) {
     const outline = darkenHex(currentColor, 0.35);
     const layer = L.geoJSON(region.feature, {
+      pane: WATCH_PANE_NAME,
       style: {
         color: outline,
         weight: 2.5,
