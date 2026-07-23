@@ -36,6 +36,7 @@
 
     DrawTools.init(map);
     MiniMap.init(map);
+    RoadsLayer.init(map); // se carga en memoria pero permanece oculta hasta activarla en la toolbar
 
     window.__mcdMap = map; // debug/testing hook
   }
@@ -63,6 +64,41 @@
     });
     document.getElementById('toggleDepartamentos').addEventListener('change', function (e) {
       BoundariesLayer.setDepartamentosVisible(e.target.checked);
+    });
+
+    const toggleRutas = document.getElementById('toggleRutas');
+    const roadsColorControls = document.getElementById('roadsColorControls');
+    toggleRutas.addEventListener('change', function (e) {
+      RoadsLayer.setVisible(e.target.checked);
+      roadsColorControls.classList.toggle('hidden', !e.target.checked);
+    });
+    document.getElementById('roadColorInput').addEventListener('input', function (e) {
+      RoadsLayer.setRoadColor(e.target.value);
+    });
+    document.getElementById('roadCasingColorInput').addEventListener('input', function (e) {
+      RoadsLayer.setCasingColor(e.target.value);
+    });
+
+    document.getElementById('btnLoadMetar').addEventListener('click', function () {
+      const btn = this;
+      const originalText = btn.textContent;
+      btn.textContent = 'Cargando...';
+      btn.disabled = true;
+      MetarLayer.load(map).then(function (count) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        if (!count) {
+          alert('No se encontraron observaciones para mostrar en este momento.');
+        }
+      }).catch(function (err) {
+        console.error('Error cargando METAR/SMN:', err);
+        btn.textContent = originalText;
+        btn.disabled = false;
+        alert('No se pudieron cargar las observaciones del SMN. Puede ser un problema temporal de conexión con el servicio del SMN — probá de nuevo en unos segundos.');
+      });
+    });
+    document.getElementById('btnClearMetar').addEventListener('click', function () {
+      MetarLayer.clear();
     });
 
     document.querySelectorAll('.tb-btn[data-tool]').forEach(function (btn) {
@@ -105,6 +141,7 @@
     initMap();
     wireToolbar();
     SpcPanel.init();
+    PanelTheme.init();
     FloatingBoxes.init(document.getElementById('map-wrapper'));
     ExportTool.init();
     wireGlobalDeselect();
