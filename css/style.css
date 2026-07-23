@@ -1,0 +1,404 @@
+/* ==========================================================================
+   MCD Editor — Argentina
+   Estilo clásico SPC (Storm Prediction Center) — blanco/negro, bordes duros
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #d9d9d9;
+  color: #000;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ============ TOOLBAR ============ */
+#toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 6px 10px;
+  border-bottom: 2px solid #000;
+  z-index: 2000;
+}
+.toolbar-title {
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tb-label { font-size: 12px; color: #ccc; }
+#baseLayerSelect {
+  font-size: 12px;
+  padding: 3px 4px;
+}
+.tb-check {
+  font-size: 12px;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+.draw-tools {
+  border-left: 1px solid #444;
+  border-right: 1px solid #444;
+  padding: 4px 10px;
+}
+.tb-btn {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 3px;
+  padding: 4px 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tb-btn:hover { background: #4a4a4a; }
+.tb-btn.active { background: #0060c0; border-color: #0090ff; }
+.tb-btn.primary { background: #0a6b0a; border-color: #16a316; }
+.tb-btn.primary:hover { background: #0f7f0f; }
+.tb-btn.danger { background: #7a1414; border-color: #a31d1d; }
+.tb-btn.danger:hover { background: #931b1b; }
+.tb-btn.small { font-size: 11px; padding: 2px 6px; margin-top: 4px; }
+
+/* ============ MAIN LAYOUT ============ */
+#main-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ============ SPC LEFT PANEL ============ */
+#spc-panel {
+  width: 300px;
+  min-width: 300px;
+  background: #ffffff;
+  border-right: 3px solid #000;
+  overflow-y: auto;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.panel-header-row {
+  border-bottom: 2px solid #000;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+.mcd-title-block {
+  text-align: left;
+}
+.mcd-title-line1, .mcd-title-line2 {
+  font-size: 26px;
+  font-weight: bold;
+  line-height: 1.05;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+}
+.mcd-number-row {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 4px;
+  color: #000;
+}
+
+.panel-valid-row {
+  font-size: 13px;
+  font-weight: bold;
+  border-bottom: 1px solid #999;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.panel-concerning {
+  margin-bottom: 6px;
+  border-bottom: 1px solid #999;
+  padding-bottom: 6px;
+}
+.pc-label {
+  font-weight: bold;
+  font-size: 13px;
+}
+.pc-value {
+  font-size: 13px;
+}
+
+.panel-watch-row {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  border: 2px solid #000;
+  padding: 5px;
+  margin-bottom: 4px;
+  background: #f6f6f6;
+}
+.panel-watch-prob-row {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.panel-section-title {
+  font-weight: bold;
+  font-size: 13px;
+  border-bottom: 2px solid #000;
+  margin: 10px 0 4px 0;
+  padding-bottom: 2px;
+}
+
+.peak-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.peak-table td {
+  border: 1px solid #333;
+  padding: 3px 5px;
+}
+.pi-label { font-weight: bold; width: 30%; }
+.pi-swatch {
+  width: 40px;
+  cursor: pointer;
+  border: 1px solid #000 !important;
+}
+.pi-value { width: 45%; }
+
+.pi-max-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.pi-max-gradient {
+  flex: 1;
+  height: 10px;
+  border: 1px solid #000;
+  background: linear-gradient(to right, #fff9b0, #ffcc00, #ff6600, #ff0000, #8b0000);
+}
+.pi-max-text {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.fields-list {
+  margin: 0 0 4px 0;
+  padding-left: 18px;
+  font-size: 12px;
+}
+.fields-list li {
+  margin-bottom: 2px;
+}
+
+#miniMapContainer {
+  border: 2px solid #000;
+  margin-top: 4px;
+  margin-bottom: 10px;
+  height: 160px;
+  background: #fff;
+}
+#miniMap {
+  width: 100%;
+  height: 100%;
+}
+
+.editable {
+  outline: none;
+  border-bottom: 1px dashed transparent;
+  cursor: text;
+}
+.editable:hover {
+  border-bottom: 1px dashed #888;
+  background: #fffbdd;
+}
+.editable:focus {
+  border-bottom: 1px dashed #0060c0;
+  background: #fffde0;
+}
+
+/* ============ MAP AREA ============ */
+#map-wrapper {
+  flex: 1;
+  position: relative;
+  background: #000;
+  border: 3px solid #000;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  background: #4a4a4a;
+}
+
+/* ============ FLOATING TEXT BOXES (WATCH LIKELY style) ============ */
+.floating-textbox {
+  position: absolute;
+  z-index: 1500;
+  min-width: 220px;
+  max-width: 420px;
+  background: #ffffff;
+  border: 2.5px solid #000;
+  padding: 6px 10px 8px 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  cursor: default;
+}
+.ftb-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+  white-space: pre-wrap;
+}
+.ftb-body {
+  text-align: center;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  line-height: 1.3;
+}
+.ftb-handle {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  cursor: grab;
+  font-size: 11px;
+  color: #888;
+  user-select: none;
+}
+.floating-textbox.selected {
+  outline: 2px dashed #0060c0;
+}
+
+/* ============ STYLE EDITOR PANEL (floating tool options) ============ */
+.style-editor {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  width: 260px;
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+  z-index: 5000;
+  font-size: 12px;
+}
+.style-editor.hidden { display: none; }
+.se-header {
+  background: #1a1a1a;
+  color: #fff;
+  font-weight: bold;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.se-header button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+.se-body {
+  padding: 8px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.se-row {
+  margin-bottom: 8px;
+}
+.se-row label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 3px;
+  font-size: 11px;
+}
+.se-row input[type="text"],
+.se-row input[type="number"],
+.se-row textarea,
+.se-row select {
+  width: 100%;
+  font-size: 12px;
+  padding: 3px;
+  box-sizing: border-box;
+}
+.se-row input[type="color"] {
+  width: 100%;
+  height: 26px;
+  border: 1px solid #999;
+  padding: 0;
+}
+.se-swatch-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.se-iro-wheel {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0;
+}
+.se-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.se-actions button {
+  flex: 1;
+  padding: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Leaflet override tweaks for SPC feel */
+.leaflet-container {
+  background: #4a4a4a;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.leaflet-draw-toolbar { display: none !important; } /* we use our own toolbar */
+
+/* Symbol label divIcon styles */
+.hl-marker-label {
+  font-weight: bold;
+  font-size: 22px;
+  font-family: Arial, Helvetica, sans-serif;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 3px #fff;
+  text-align: center;
+}
+.front-label-marker {
+  font-weight: bold;
+  font-size: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 1px 4px;
+  border: 1.5px solid;
+  border-radius: 3px;
+  background: #fff;
+  white-space: nowrap;
+}
+
+/* Mini map inset overlay rectangle */
+.mm-extent-rect {
+  fill: none;
+}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesoscale Discussion Editor — Argentina</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ TOP TOOLBAR ============ -->
+  <header id="toolbar">
+    <div class="toolbar-group">
+      <span class="toolbar-title">MCD EDITOR — ARGENTINA</span>
+    </div>
+
+    <div class="toolbar-group">
+      <label class="tb-label">Mapa base:</label>
+      <select id="baseLayerSelect">
+        <option value="osm">OpenStreetMap</option>
+        <option value="carto_light">CARTO Light</option>
+        <option value="carto_dark">CARTO Dark Matter</option>
+        <option value="carto_voyager">CARTO Voyager</option>
+        <option value="cartopy_dark" selected>Estilo Cartopy (Gris Oscuro)</option>
+        <option value="satellite_bw">Satélite B/N (simulado)</option>
+        <option value="none">Sin mapa base (blanco)</option>
+      </select>
+      <label class="tb-check"><input type="checkbox" id="toggleProvincias" checked> Límites provinciales</label>
+      <label class="tb-check"><input type="checkbox" id="toggleDepartamentos" checked> Límites departamentales</label>
+    </div>
+
+    <div class="toolbar-group draw-tools">
+      <button class="tb-btn" data-tool="mcd-polygon" title="Dibujar área MCD (contorno negro grueso)">⬛ Área MCD</button>
+      <button class="tb-btn" data-tool="contour-polygon" title="Área de contorno con color RGB">◯ Contorno color</button>
+      <button class="tb-btn" data-tool="hatch-polygon" title="Área con trama (hatch)">▦ Área Hatch</button>
+      <button class="tb-btn" data-tool="front-warm" title="Frente cálido">🔴 Cálido</button>
+      <button class="tb-btn" data-tool="front-cold" title="Frente frío">🔵 Frío</button>
+      <button class="tb-btn" data-tool="front-stationary" title="Frente estacionario">🟣 Estacionario</button>
+      <button class="tb-btn" data-tool="front-occluded" title="Frente ocluido">🟠 Ocluido</button>
+      <button class="tb-btn" data-tool="dryline" title="Dryline">🟧 Dryline</button>
+      <button class="tb-btn" data-tool="trough" title="Vaguada">➰ Vaguada</button>
+      <button class="tb-btn" data-tool="isobar" title="Isobara">➖ Isobara</button>
+      <button class="tb-btn" data-tool="marker-L" title="Centro de baja presión">L</button>
+      <button class="tb-btn" data-tool="marker-H" title="Centro de alta presión">H</button>
+      <button class="tb-btn" data-tool="textbox" title="Caja de texto">🔲 Texto</button>
+      <button class="tb-btn" data-tool="label" title="Etiqueta de texto libre">Aa</button>
+      <button class="tb-btn" id="btnSelect" title="Seleccionar / Editar">↖ Editar</button>
+      <button class="tb-btn danger" id="btnDelete" title="Eliminar elemento seleccionado">🗑 Borrar</button>
+      <button class="tb-btn" id="btnClearAll">Limpiar Todo</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tb-btn primary" id="btnExport">⬇ Exportar PNG</button>
+    </div>
+  </header>
+
+  <!-- ============ MAIN LAYOUT ============ -->
+  <div id="main-layout">
+
+    <!-- ======= LEFT PANEL (SPC style) ======= -->
+    <div id="spc-panel">
+
+      <div class="panel-header-row">
+        <div class="mcd-title-block">
+          <div class="mcd-title-line1">Mesoscale</div>
+          <div class="mcd-title-line2">Discussion</div>
+          <div class="mcd-number-row">
+            #<span id="mcdNumber" class="editable" contenteditable="true">860</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-valid-row">
+        Valid Until: <span id="mcdValidUntil" class="editable" contenteditable="true">00:00 AM ART</span>
+      </div>
+
+      <div class="panel-concerning">
+        <div class="pc-label">Concerning</div>
+        <div class="pc-value editable" id="mcdConcerning" contenteditable="true">Severe Potential</div>
+      </div>
+
+      <div class="panel-watch-row">
+        <span id="mcdWatchType" class="editable" contenteditable="true">Tornado Watch Likely</span>
+      </div>
+      <div class="panel-watch-prob-row">
+        Watch Probability: <span id="mcdWatchProb" class="editable" contenteditable="true">95</span>%
+      </div>
+
+      <!-- Peak Intensity Table -->
+      <div class="panel-section-title">
+        <span class="editable" id="peakIntensityTitle" contenteditable="true">Most Probable Peak Intensity</span>
+      </div>
+      <table id="peakIntensityTable" class="peak-table">
+        <tbody>
+          <tr data-row="tornado">
+            <td class="pi-label editable" contenteditable="true">Tornado</td>
+            <td class="pi-swatch" data-swatch="tornado" style="background:#ff0000;"></td>
+            <td class="pi-value editable" contenteditable="true">155-190 mph</td>
+          </tr>
+          <tr data-row="hail">
+            <td class="pi-label editable" contenteditable="true">Hail</td>
+            <td class="pi-swatch" data-swatch="hail" style="background:#00b74a;"></td>
+            <td class="pi-value editable" contenteditable="true">&gt; 4.00 in.</td>
+          </tr>
+          <tr data-row="wind">
+            <td class="pi-label editable" contenteditable="true">Wind</td>
+            <td class="pi-swatch" data-swatch="wind" style="background:#ff8c00;"></td>
+            <td class="pi-value editable" contenteditable="true">65-80 mph</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pi-max-legend">
+        <div class="pi-max-gradient"></div>
+        <span class="pi-max-text">Max</span>
+      </div>
+
+      <!-- Fields plotted -->
+      <div class="panel-section-title">Fields Plotted</div>
+      <ul id="fieldsPlottedList" class="fields-list">
+        <li class="editable" contenteditable="true">2016Z Visible Satélite</li>
+        <li class="editable" contenteditable="true">Observaciones de Superficie</li>
+        <li class="editable" contenteditable="true">Viento VAD de Radar</li>
+        <li class="editable" contenteditable="true">20Z Cizalladura Efectiva (kts)</li>
+      </ul>
+      <button class="tb-btn small" id="btnAddField">+ Agregar campo</button>
+
+      <!-- Regional inset mini-map -->
+      <div class="panel-section-title">Vista Regional</div>
+      <div id="miniMapContainer">
+        <div id="miniMap"></div>
+      </div>
+
+    </div>
+
+    <!-- ======= MAP AREA ======= -->
+    <div id="map-wrapper">
+      <div id="map"></div>
+
+      <!-- Floating watch statement box, draggable, editable, like "-- WATCH LIKELY --" -->
+      <div id="watchStatementBox" class="floating-textbox" style="top:20px; left:120px;">
+        <div class="ftb-header editable" contenteditable="true">-- WATCH LIKELY --</div>
+        <div class="ftb-body editable" contenteditable="true">Supercélulas podrían formarse desde el oeste de Córdoba hacia el sur de Santa Fe.
+Granizo muy grande y tornados serán posibles.</div>
+        <div class="ftb-handle" title="Arrastrar">⋮⋮</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ CONTEXT TOOLBOX (color pickers, style editors) ============ -->
+<div id="styleEditor" class="style-editor hidden">
+  <div class="se-header">
+    <span id="seTitle">Editar elemento</span>
+    <button id="seClose">✕</button>
+  </div>
+  <div class="se-body" id="seBody"></div>
+</div>
+
+<!-- Templates for new floating text boxes -->
+<template id="tpl-floating-textbox">
+  <div class="floating-textbox">
+    <div class="ftb-header editable" contenteditable="true">-- TITULO --</div>
+    <div class="ftb-body editable" contenteditable="true">Texto editable aquí.</div>
+    <div class="ftb-handle" title="Arrastrar">⋮⋮</div>
+  </div>
+</template>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+<script src="https://unpkg.com/leaflet.pattern@0.1.0/dist/leaflet.pattern.js"></script>
+<script src="https://unpkg.com/@jaames/iro@5/dist/iro.min.js"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script src="js/basemaps.js"></script>
+<script src="js/boundaries.js"></script>
+<script src="js/symbols.js"></script>
+<script src="js/styleeditor.js"></script>
+<script src="js/drawtools.js"></script>
+<script src="js/floatingbox.js"></script>
+<script src="js/panel.js"></script>
+<script src="js/minimap.js"></script>
+<script src="js/export.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
