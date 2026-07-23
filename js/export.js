@@ -59,50 +59,58 @@ const ExportTool = (function () {
     // antes de capturar, y lo restauramos después.
     const frozen = freezeLeafletTransforms();
 
-    // Habilita temporalmente que el panel muestre TODO su contenido (sin
-    // scroll) para que la captura no corte la tabla de intensidad, "Fields
-    // Plotted" ni el mini mapa cuando la ventana del navegador es baja.
-    const panelRestore = expandPanelFully(panelEl);
+    let panelRestore = null;
 
     try {
       const desiredScale = 2;
 
-      const panelRect = { width: panelEl.scrollWidth, height: panelEl.scrollHeight };
+      // IMPORTANTE: el mapa se captura ANTES de expandir el panel lateral.
+      // #main-layout es un contenedor flex con alineación "stretch" por
+      // defecto: si se agranda la altura del panel para mostrar todo su
+      // contenido (tabla de intensidad, fields plotted, mini mapa) sin
+      // scroll, el navegador también estira #map-wrapper por ser su
+      // hermano flex — pero Leaflet nunca se entera de ese cambio de
+      // tamaño (no se llama invalidateSize), así que sus tiles y capas
+      // quedan dibujados sólo en la porción superior original, dejando el
+      // resto de la imagen exportada en blanco. Capturando el mapa primero
+      // se evita por completo ese problema.
+      //
+      // NOTA: a diferencia del panel, aquí NO se pasan `width`/`height`/
+      // `windowWidth`/`windowHeight` — html2canvas ya usa el tamaño real
+      // del elemento en pantalla, y combinar esos parámetros explícitos
+      // con `scale` provoca que sólo se renderice la esquina superior
+      // izquierda del canvas final (el resto queda en blanco), un
+      // comportamiento conocido de html2canvas al duplicar el efecto de
+      // escala. Sólo se necesita fijar esos parámetros para el panel, que
+      // sí debe expandirse más allá de su tamaño visible en pantalla.
       const mapRect = { width: mapWrapperEl.clientWidth, height: mapWrapperEl.clientHeight };
+      const mapScale = computeSafeScale(mapRect.width, mapRect.height, desiredScale);
 
-      // Se usa la misma escala para ambas capturas (calculada sobre el
-      // tamaño combinado final) para que no queden desproporcionadas al
-      // unirlas lado a lado.
-      const combinedWidth = panelRect.width + mapRect.width;
-      const combinedHeight = Math.max(panelRect.height, mapRect.height);
-      const scale = computeSafeScale(combinedWidth, combinedHeight, desiredScale);
+      const mapCanvas = await html2canvas(mapWrapperEl, {
+        useCORS: true,
+        allowTaint: false,
+        scale: mapScale,
+        backgroundColor: '#ffffff'
+      });
 
-      const [panelCanvas, mapCanvas] = await Promise.all([
-        html2canvas(panelEl, {
-          useCORS: true,
-          allowTaint: false,
-          scale: scale,
-          backgroundColor: getComputedStyle(panelEl).backgroundColor || '#ffffff',
-          scrollX: 0,
-          scrollY: 0,
-          width: panelRect.width,
-          height: panelRect.height,
-          windowWidth: panelRect.width,
-          windowHeight: panelRect.height
-        }),
-        html2canvas(mapWrapperEl, {
-          useCORS: true,
-          allowTaint: false,
-          scale: scale,
-          backgroundColor: '#ffffff',
-          scrollX: 0,
-          scrollY: 0,
-          width: mapRect.width,
-          height: mapRect.height,
-          windowWidth: mapRect.width,
-          windowHeight: mapRect.height
-        })
-      ]);
+      // Ahora sí se expande el panel a su altura de contenido completa
+      // (sin scroll) para capturarlo por separado.
+      panelRestore = expandPanelFully(panelEl);
+      const panelRect = { width: panelEl.scrollWidth, height: panelEl.scrollHeight };
+      const panelScale = computeSafeScale(panelRect.width, panelRect.height, desiredScale);
+
+      const panelCanvas = await html2canvas(panelEl, {
+        useCORS: true,
+        allowTaint: false,
+        scale: panelScale,
+        backgroundColor: getComputedStyle(panelEl).backgroundColor || '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        width: panelRect.width,
+        height: panelRect.height,
+        windowWidth: panelRect.width,
+        windowHeight: panelRect.height
+      });
 
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = panelCanvas.width + mapCanvas.width;
@@ -127,7 +135,7 @@ const ExportTool = (function () {
         alert('No se pudo exportar la imagen. Es posible que algún mapa base bloquee la exportación por CORS. Probá con el mapa "Estilo Cartopy" o "Sin mapa base" para exportar sin problemas.');
       }
     } finally {
-      panelRestore();
+      if (panelRestore) panelRestore();
       unfreezeLeafletTransforms(frozen);
       if (btn) { btn.textContent = originalLabel; btn.disabled = false; }
     }

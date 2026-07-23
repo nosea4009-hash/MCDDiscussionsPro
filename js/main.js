@@ -37,6 +37,12 @@
     DrawTools.init(map);
     MiniMap.init(map);
     RoadsLayer.init(map); // se carga en memoria pero permanece oculta hasta activarla en la toolbar
+    RegionMask.init(); // habilita la restricción de área MCD/Contorno a Argentina, Paraguay y Uruguay
+    DeptLabels.init(map); // etiquetas de departamentos AR+PY+UY, ocultas por defecto
+    WatchTool.init(map); // herramienta de vigilancias por departamento/municipio
+    NeighborCountries.init(map).then(function () {
+      NeighborCountries.setVisible(currentBaseKey === 'cartopy_dark');
+    });
 
     window.__mcdMap = map; // debug/testing hook
   }
@@ -52,6 +58,10 @@
     currentBaseKey = key;
     applyBasemapBackground(document.getElementById('map'), key);
     BoundariesLayer.setDarkMode(def.isDark);
+    // Los países vecinos (Chile/Brasil/Bolivia) sólo se muestran en el mapa
+    // "Estilo Cartopy" custom, ya que en los demás basemaps esos países ya
+    // aparecen naturalmente en los tiles de fondo.
+    NeighborCountries.setVisible(key === 'cartopy_dark');
   }
 
   function wireToolbar() {
@@ -77,6 +87,33 @@
     });
     document.getElementById('roadCasingColorInput').addEventListener('input', function (e) {
       RoadsLayer.setCasingColor(e.target.value);
+    });
+
+    const toggleDeptLabels = document.getElementById('toggleDeptLabels');
+    toggleDeptLabels.addEventListener('change', function (e) {
+      DeptLabels.setVisible(e.target.checked);
+    });
+    document.getElementById('btnDeptLabelStyle').addEventListener('click', function () {
+      StyleEditor.showForDeptLabels();
+    });
+
+    const btnWatchTool = document.getElementById('btnWatchTool');
+    const watchColorControls = document.getElementById('watchColorControls');
+    btnWatchTool.addEventListener('click', function () {
+      const nowActive = !WatchTool.isActive();
+      WatchTool.setActive(nowActive);
+      btnWatchTool.classList.toggle('active', nowActive);
+      watchColorControls.classList.toggle('hidden', !nowActive);
+      if (nowActive) {
+        DrawTools.setTool(null); // las herramientas de dibujo libre y la de vigilancia son mutuamente excluyentes
+      }
+    });
+    document.getElementById('watchColorInput').addEventListener('input', function (e) {
+      WatchTool.setColor(e.target.value);
+    });
+    document.getElementById('btnClearWatches').addEventListener('click', function () {
+      if (WatchTool.count() && !confirm('¿Quitar todas las vigilancias pintadas?')) return;
+      WatchTool.clearAll();
     });
 
     document.getElementById('btnLoadMetar').addEventListener('click', function () {
@@ -106,6 +143,13 @@
         const tool = btn.getAttribute('data-tool');
         const isActive = btn.classList.contains('active');
         DrawTools.setTool(isActive ? null : tool);
+        // Al elegir cualquier herramienta de dibujo libre, se desactiva la
+        // herramienta de Vigilancia si estaba activa (son excluyentes).
+        if (!isActive && WatchTool.isActive()) {
+          WatchTool.setActive(false);
+          document.getElementById('btnWatchTool').classList.remove('active');
+          document.getElementById('watchColorControls').classList.add('hidden');
+        }
       });
     });
 

@@ -69,10 +69,20 @@ const DrawTools = (function () {
     }
   }
 
+  // Herramientas cuya área de dibujo está restringida a Argentina, Paraguay
+  // y Uruguay (a pedido: sólo se pueden crear Áreas MCD y Contornos de
+  // color dentro de esos 3 países).
+  const REGION_RESTRICTED_TOOLS = ['mcd-polygon', 'contour-polygon'];
+
   function onShapeCreated(e) {
     const layer = e.layer;
     const tool = currentTool;
     setTool(null); // exit draw mode after one shape, user can re-click tool button
+
+    if (REGION_RESTRICTED_TOOLS.includes(tool) && !RegionMask.intersectsAllowedRegion(layer.getLatLngs())) {
+      alert('Esta herramienta sólo se puede usar dentro de Argentina, Paraguay o Uruguay. El área dibujada quedó completamente fuera de esos países y no fue creada.');
+      return;
+    }
 
     if (tool === 'mcd-polygon') {
       addMcdPolygon(layer.getLatLngs());

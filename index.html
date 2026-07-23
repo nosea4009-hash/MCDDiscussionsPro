@@ -7,6 +7,9 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -37,6 +40,8 @@
         <label class="tb-check">Color ruta <input type="color" id="roadColorInput" value="#b45300"></label>
         <label class="tb-check">Contorno <input type="color" id="roadCasingColorInput" value="#000000"></label>
       </span>
+      <label class="tb-check"><input type="checkbox" id="toggleDeptLabels"> Etiquetas de departamentos</label>
+      <button class="tb-btn small" id="btnDeptLabelStyle" title="Editar color de texto y contorno de las etiquetas">🎨 Estilo etiquetas</button>
     </div>
 
     <div class="toolbar-group">
@@ -69,9 +74,14 @@
       <button class="tb-btn" data-tool="marker-H" title="Centro de alta presión">H</button>
       <button class="tb-btn" data-tool="textbox" title="Caja de texto">🔲 Texto</button>
       <button class="tb-btn" data-tool="label" title="Etiqueta de texto libre">Aa</button>
+      <button class="tb-btn" id="btnWatchTool" title="Vigilancia: coloreá departamentos/municipios haciendo clic sobre ellos">⚠ Vigilancia</button>
+      <span id="watchColorControls" class="panel-custom-colors hidden">
+        <label class="tb-check">Color vigilancia <input type="color" id="watchColorInput" value="#ffd400"></label>
+      </span>
       <button class="tb-btn" id="btnSelect" title="Seleccionar / Editar">↖ Editar</button>
       <button class="tb-btn danger" id="btnDelete" title="Eliminar elemento seleccionado">🗑 Borrar</button>
       <button class="tb-btn" id="btnClearAll">Limpiar Todo</button>
+      <button class="tb-btn danger" id="btnClearWatches" title="Quitar todas las vigilancias pintadas">🗑 Limpiar vigilancias</button>
     </div>
 
     <div class="toolbar-group">
@@ -204,10 +214,17 @@ Granizo muy grande y tornados serán posibles.</div>
 <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
 <script src="js/basemaps.js"></script>
 <script src="js/boundaries.js"></script>
 <script src="js/roads.js"></script>
 <script src="js/metar.js"></script>
+<script src="js/adminregions.js"></script>
+<script src="js/regionmask.js"></script>
+<script src="js/deptlabels.js"></script>
+<script src="js/watches.js"></script>
+<script src="js/neighborcountries.js"></script>
 <script src="js/symbols.js"></script>
 <script src="js/styleeditor.js"></script>
 <script src="js/drawtools.js"></script>

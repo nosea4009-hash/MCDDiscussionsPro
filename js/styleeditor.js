@@ -217,6 +217,38 @@ const StyleEditor = (function () {
     addColorWheel(current, c => { swatchEl.style.background = c; });
   }
 
+  /* -------------------- Public: show for department labels (AR+PY+UY) -------------------- */
+
+  function showForDeptLabels() {
+    clearBody();
+    show('Etiquetas de departamentos');
+    addRow('<label>Color del texto</label>');
+    addColorWheel(DeptLabels.getTextColor(), c => DeptLabels.setTextColor(c));
+    addRow('<label>Color del contorno exterior del texto</label>');
+    // Se agrega una segunda rueda de color independiente para el contorno;
+    // como addColorWheel reemplaza currentIro, se crea manualmente el
+    // segundo wheel para poder tener dos activos en simultáneo en este panel.
+    const wheelDiv = document.createElement('div');
+    wheelDiv.className = 'se-iro-wheel';
+    const wheelId = 'iro-' + Math.random().toString(36).slice(2);
+    wheelDiv.id = wheelId;
+    const row = document.createElement('div');
+    row.className = 'se-row';
+    row.appendChild(wheelDiv);
+    bodyEl.appendChild(row);
+    const outlineWheel = new iro.ColorPicker('#' + wheelId, {
+      width: 180,
+      color: DeptLabels.getOutlineColor(),
+      layout: [
+        { component: iro.ui.Wheel },
+        { component: iro.ui.Slider, options: { sliderType: 'value' } }
+      ]
+    });
+    outlineWheel.on('color:change', function (color) { DeptLabels.setOutlineColor(color.hexString); });
+
+    addRow('<em style="font-size:11px;color:#555;">Fuente: Open Sans Bold.</em>');
+  }
+
   function rgbToHex(rgb) {
     if (!rgb) return null;
     const m = rgb.match(/\d+/g);
@@ -224,5 +256,5 @@ const StyleEditor = (function () {
     return '#' + m.slice(0,3).map(x => parseInt(x).toString(16).padStart(2,'0')).join('');
   }
 
-  return { showFor, showForFloatingBox, showForSwatch, hide };
+  return { showFor, showForFloatingBox, showForSwatch, showForDeptLabels, hide };
 })();
