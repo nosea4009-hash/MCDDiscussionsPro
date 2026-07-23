@@ -100,6 +100,18 @@
     </div>
 
     <div class="toolbar-group">
+      <label class="tb-check"><input type="checkbox" id="toggleSatellite"> 🛰 Satélite (GOES-19)</label>
+      <span id="satelliteControls" class="panel-custom-colors hidden">
+        <select id="satelliteProductSelect">
+          <option value="visible_red">Visible Rojo</option>
+          <option value="ir_band13">Infrarrojo Banda 13</option>
+          <option value="day_cloud_phase">Fase de Nube del Día (JMA)</option>
+        </select>
+        <button class="tb-btn small" id="btnRefreshSatellite" title="Descargar la imagen más reciente">↻ Actualizar</button>
+      </span>
+    </div>
+
+    <div class="toolbar-group">
       <button class="tb-btn primary" id="btnExport">⬇ Exportar PNG</button>
     </div>
   </header>
@@ -182,6 +194,13 @@
         <div id="radarLegendTimestamp"></div>
       </div>
 
+      <!-- Satellite info, hidden until the satellite layer is turned on -->
+      <div id="satelliteInfoSection" class="hidden">
+        <div class="panel-section-title">Satélite GOES-19</div>
+        <div id="satelliteProductLabel"></div>
+        <div id="satelliteTimestamp"></div>
+      </div>
+
       <!-- Regional inset mini-map -->
       <div class="panel-section-title">Vista Regional</div>
       <div id="miniMapContainer">
@@ -238,6 +257,7 @@ Granizo muy grande y tornados serán posibles.</div>
 <script src="js/boundaries.js"></script>
 <script src="js/roads.js"></script>
 <script src="js/radar.js"></script>
+<script src="js/satellite.js"></script>
 <script src="js/metar.js"></script>
 <script src="js/adminregions.js"></script>
 <script src="js/regionmask.js"></script>
