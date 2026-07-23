@@ -41,6 +41,7 @@
     DeptLabels.init(map); // etiquetas de departamentos AR+PY+UY, ocultas por defecto
     WatchTool.init(map); // herramienta de vigilancias por departamento/municipio
     RadarLayer.init(map); // imágenes de radar RMA/OHMC, ocultas hasta activarlas en la toolbar
+    SatelliteLayer.init(map); // imágenes de satélite GOES-19, ocultas hasta activarlas en la toolbar
     NeighborCountries.init(map).then(function () {
       NeighborCountries.setVisible(currentBaseKey === 'cartopy_dark');
     });
@@ -140,6 +141,7 @@
     });
 
     wireRadarControls();
+    wireSatelliteControls();
 
     document.querySelectorAll('.tb-btn[data-tool]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -219,6 +221,12 @@
         RadarLayer.setVisible(false);
         return;
       }
+      // Radar y Satélite son mutuamente excluyentes: ambos son imágenes de
+      // pantalla completa, así que activar uno apaga el otro automáticamente.
+      if (SatelliteLayer.isVisible()) {
+        document.getElementById('toggleSatellite').checked = false;
+        document.getElementById('toggleSatellite').dispatchEvent(new Event('change'));
+      }
       toggleRadar.disabled = true;
       try {
         await RadarLayer.setVisible(true);
@@ -254,6 +262,81 @@
 
     radarOpacityInput.addEventListener('input', function (e) {
       RadarLayer.setOpacity(parseFloat(e.target.value));
+    });
+  }
+
+  function wireSatelliteControls() {
+    const toggleSatellite = document.getElementById('toggleSatellite');
+    const satelliteControls = document.getElementById('satelliteControls');
+    const satelliteInfoSection = document.getElementById('satelliteInfoSection');
+    const satelliteProductSelect = document.getElementById('satelliteProductSelect');
+    const btnRefreshSatellite = document.getElementById('btnRefreshSatellite');
+
+    function renderInfo() {
+      const products = SatelliteLayer.getProducts();
+      const key = SatelliteLayer.getCurrentProductKey();
+      document.getElementById('satelliteProductLabel').textContent = products[key] ? products[key].label : '';
+      const ts = SatelliteLayer.getCurrentTimestampLabel();
+      document.getElementById('satelliteTimestamp').textContent = ts ? ('Último frame: ' + ts) : '';
+    }
+
+    toggleSatellite.addEventListener('change', async function (e) {
+      const checked = e.target.checked;
+      satelliteControls.classList.toggle('hidden', !checked);
+      satelliteInfoSection.classList.toggle('hidden', !checked);
+      if (!checked) {
+        SatelliteLayer.setVisible(false);
+        return;
+      }
+      // Radar y Satélite son mutuamente excluyentes (ver comentario en wireRadarControls)
+      if (RadarLayer.isVisible()) {
+        document.getElementById('toggleRadar').checked = false;
+        document.getElementById('toggleRadar').dispatchEvent(new Event('change'));
+      }
+      toggleSatellite.disabled = true;
+      try {
+        await SatelliteLayer.setVisible(true, satelliteProductSelect.value);
+        renderInfo();
+      } catch (err) {
+        console.error('Error cargando satélite GOES-19:', err);
+        alert('No se pudo cargar la imagen de satélite GOES-19. Puede ser un problema temporal de conexión — probá de nuevo en unos segundos.');
+        toggleSatellite.checked = false;
+        satelliteControls.classList.add('hidden');
+        satelliteInfoSection.classList.add('hidden');
+      } finally {
+        toggleSatellite.disabled = false;
+      }
+    });
+
+    satelliteProductSelect.addEventListener('change', async function () {
+      if (!toggleSatellite.checked) return;
+      satelliteProductSelect.disabled = true;
+      try {
+        await SatelliteLayer.setProduct(satelliteProductSelect.value);
+        await SatelliteLayer.setVisible(true, satelliteProductSelect.value);
+        renderInfo();
+      } catch (err) {
+        console.error('Error cambiando de producto de satélite:', err);
+        alert('No se pudo cargar ese producto de satélite. Probá de nuevo en unos segundos.');
+      } finally {
+        satelliteProductSelect.disabled = false;
+      }
+    });
+
+    btnRefreshSatellite.addEventListener('click', async function () {
+      const originalText = btnRefreshSatellite.textContent;
+      btnRefreshSatellite.textContent = '⏳';
+      btnRefreshSatellite.disabled = true;
+      try {
+        await SatelliteLayer.setProduct(satelliteProductSelect.value);
+        renderInfo();
+      } catch (err) {
+        console.error('Error actualizando satélite GOES-19:', err);
+        alert('No se pudo actualizar la imagen de satélite. Probá de nuevo en unos segundos.');
+      } finally {
+        btnRefreshSatellite.textContent = originalText;
+        btnRefreshSatellite.disabled = false;
+      }
     });
   }
 
