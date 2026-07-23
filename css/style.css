@@ -519,3 +519,26 @@ html, body {
 
 /* ============ Herramienta de Vigilancias (Watches) ============ */
 #watchColorControls.hidden { display: none; }
+
+/* ============ Leyenda de radar (dBZ, paleta NWSStormClearReflectivity) ============ */
+#radarLegendSection.hidden { display: none; }
+#radarLegendBar {
+  height: 14px;
+  border: 1px solid var(--panel-border);
+  margin-top: 4px;
+}
+#radarLegendLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: bold;
+  margin-top: 2px;
+  color: var(--panel-text);
+}
+#radarLegendTimestamp {
+  font-size: 10.5px;
+  color: var(--panel-text);
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-style: italic;
+}

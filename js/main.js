@@ -40,6 +40,7 @@
     RegionMask.init(); // habilita la restricción de área MCD/Contorno a Argentina, Paraguay y Uruguay
     DeptLabels.init(map); // etiquetas de departamentos AR+PY+UY, ocultas por defecto
     WatchTool.init(map); // herramienta de vigilancias por departamento/municipio
+    RadarLayer.init(map); // imágenes de radar RMA/OHMC, ocultas hasta activarlas en la toolbar
     NeighborCountries.init(map).then(function () {
       NeighborCountries.setVisible(currentBaseKey === 'cartopy_dark');
     });
@@ -138,6 +139,8 @@
       MetarLayer.clear();
     });
 
+    wireRadarControls();
+
     document.querySelectorAll('.tb-btn[data-tool]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const tool = btn.getAttribute('data-tool');
@@ -169,6 +172,88 @@
     document.getElementById('btnClearAll').addEventListener('click', function () {
       if (!confirm('¿Seguro que quieres borrar todos los elementos dibujados?')) return;
       DrawTools.clearAll();
+    });
+  }
+
+  function wireRadarControls() {
+    const toggleRadar = document.getElementById('toggleRadar');
+    const radarControls = document.getElementById('radarControls');
+    const btnRefreshRadar = document.getElementById('btnRefreshRadar');
+    const radarOpacityInput = document.getElementById('radarOpacityInput');
+    const radarLegendSection = document.getElementById('radarLegendSection');
+
+    function renderLegend() {
+      const bar = document.getElementById('radarLegendBar');
+      const labels = document.getElementById('radarLegendLabels');
+      const ticks = RadarLayer.getLegendTicks();
+      const stops = ticks.map(function (t, i) {
+        const pct = (i / (ticks.length - 1)) * 100;
+        return 'rgb(' + t.color.join(',') + ') ' + pct + '%';
+      }).join(', ');
+      bar.style.background = 'linear-gradient(to right, ' + stops + ')';
+      labels.innerHTML = ticks.map(function (t) { return '<span>' + t.value + '</span>'; }).join('');
+    }
+
+    function renderTimestamp() {
+      const el = document.getElementById('radarLegendTimestamp');
+      const cogs = RadarLayer.getActiveCogsInfo();
+      if (!cogs.length) {
+        el.textContent = 'Sin datos de radar disponibles en este momento.';
+        return;
+      }
+      // Se muestra el timestamp más reciente entre todos los radares cargados
+      const latest = cogs.reduce(function (a, b) {
+        return new Date(a.observation_time) > new Date(b.observation_time) ? a : b;
+      });
+      const d = new Date(latest.observation_time);
+      const hh = String(d.getUTCHours()).padStart(2, '0');
+      const mm = String(d.getUTCMinutes()).padStart(2, '0');
+      el.textContent = 'Producto COLMAX · ' + cogs.length + ' radares · Último frame: ' + hh + ':' + mm + 'Z';
+    }
+
+    toggleRadar.addEventListener('change', async function (e) {
+      const checked = e.target.checked;
+      radarControls.classList.toggle('hidden', !checked);
+      radarLegendSection.classList.toggle('hidden', !checked);
+      if (!checked) {
+        RadarLayer.setVisible(false);
+        return;
+      }
+      toggleRadar.disabled = true;
+      try {
+        await RadarLayer.setVisible(true);
+        renderLegend();
+        renderTimestamp();
+      } catch (err) {
+        console.error('Error cargando radar OHMC:', err);
+        alert('No se pudieron cargar las imágenes de radar del OHMC. Puede ser un problema temporal de conexión — probá de nuevo en unos segundos.');
+        toggleRadar.checked = false;
+        radarControls.classList.add('hidden');
+        radarLegendSection.classList.add('hidden');
+      } finally {
+        toggleRadar.disabled = false;
+      }
+    });
+
+    btnRefreshRadar.addEventListener('click', async function () {
+      const originalText = btnRefreshRadar.textContent;
+      btnRefreshRadar.textContent = '⏳';
+      btnRefreshRadar.disabled = true;
+      try {
+        await RadarLayer.refresh();
+        renderLegend();
+        renderTimestamp();
+      } catch (err) {
+        console.error('Error actualizando radar OHMC:', err);
+        alert('No se pudo actualizar el radar. Probá de nuevo en unos segundos.');
+      } finally {
+        btnRefreshRadar.textContent = originalText;
+        btnRefreshRadar.disabled = false;
+      }
+    });
+
+    radarOpacityInput.addEventListener('input', function (e) {
+      RadarLayer.setOpacity(parseFloat(e.target.value));
     });
   }
 

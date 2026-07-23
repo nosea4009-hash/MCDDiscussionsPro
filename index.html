@@ -90,6 +90,16 @@
     </div>
 
     <div class="toolbar-group">
+      <label class="tb-check"><input type="checkbox" id="toggleRadar"> 📡 Radar (RMA/OHMC)</label>
+      <span id="radarControls" class="panel-custom-colors hidden">
+        <button class="tb-btn small" id="btnRefreshRadar" title="Descargar el frame más reciente de todos los radares">↻ Actualizar</button>
+        <label class="tb-check">Opacidad
+          <input type="range" id="radarOpacityInput" min="0.2" max="1" step="0.05" value="0.85" style="width:80px;">
+        </label>
+      </span>
+    </div>
+
+    <div class="toolbar-group">
       <button class="tb-btn primary" id="btnExport">⬇ Exportar PNG</button>
     </div>
   </header>
@@ -164,6 +174,14 @@
       </ul>
       <button class="tb-btn small" id="btnAddField">+ Agregar campo</button>
 
+      <!-- Radar legend (dBZ), hidden until the radar layer is turned on -->
+      <div id="radarLegendSection" class="hidden">
+        <div class="panel-section-title">Radar — Reflectividad (dBZ)</div>
+        <div id="radarLegendBar"></div>
+        <div id="radarLegendLabels"></div>
+        <div id="radarLegendTimestamp"></div>
+      </div>
+
       <!-- Regional inset mini-map -->
       <div class="panel-section-title">Vista Regional</div>
       <div id="miniMapContainer">
@@ -219,6 +237,7 @@ Granizo muy grande y tornados serán posibles.</div>
 <script src="js/basemaps.js"></script>
 <script src="js/boundaries.js"></script>
 <script src="js/roads.js"></script>
+<script src="js/radar.js"></script>
 <script src="js/metar.js"></script>
 <script src="js/adminregions.js"></script>
 <script src="js/regionmask.js"></script>
