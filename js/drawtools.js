@@ -174,6 +174,7 @@ const DrawTools = (function () {
   function addContourPolygon(latlngs, color, opts) {
     opts = opts || {};
     const fillOpacity = opts.fillOpacity != null ? opts.fillOpacity : 0.12;
+    let fillEnabled = opts.fillEnabled != null ? opts.fillEnabled : true;
 
     // outer thin black stroke (drawn slightly larger via a second polygon underneath isn't accurate geodesically,
     // so instead we render an outline pass using two stacked polygons: black thin outline behind, color polygon above with own border)
@@ -181,7 +182,7 @@ const DrawTools = (function () {
       color: '#000000', weight: 5, opacity: 1, fill: false, interactive: false
     });
     const colorPoly = L.polygon(latlngs, {
-      color: color, weight: 2.6, opacity: 1, fill: true, fillColor: color, fillOpacity: fillOpacity, interactive: true
+      color: color, weight: 2.6, opacity: 1, fill: fillEnabled, fillColor: color, fillOpacity: fillEnabled ? fillOpacity : 0, interactive: true
     });
     blackOutline.addTo(map);
     colorPoly.addTo(map);
@@ -192,8 +193,13 @@ const DrawTools = (function () {
       outline: blackOutline,
       color,
       fillOpacity,
+      get fillEnabled() { return fillEnabled; },
       setColor(c) { color = c; colorPoly.setStyle({ color: c, fillColor: c }); },
-      setFillOpacity(o) { fillOpacity = o; colorPoly.setStyle({ fillOpacity: o }); },
+      setFillOpacity(o) { fillOpacity = o; if (fillEnabled) colorPoly.setStyle({ fillOpacity: o }); },
+      setFillEnabled(enabled) {
+        fillEnabled = enabled;
+        colorPoly.setStyle({ fill: enabled, fillOpacity: enabled ? fillOpacity : 0 });
+      },
       setLatLngs(ll) { colorPoly.setLatLngs(ll); blackOutline.setLatLngs(ll); },
       remove() { map.removeLayer(colorPoly); map.removeLayer(blackOutline); },
       _highlightOn() { blackOutline.setStyle({ color: '#ffff00', weight: 6 }); },

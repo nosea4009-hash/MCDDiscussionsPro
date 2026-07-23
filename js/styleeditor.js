@@ -104,6 +104,13 @@ const StyleEditor = (function () {
     return sel;
   }
 
+  function addCheckbox(labelText, checked, onChange) {
+    const row = addRow(`<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" ${checked ? 'checked' : ''} style="width:auto;"> ${labelText}</label>`);
+    const input = row.querySelector('input');
+    input.addEventListener('change', () => onChange(input.checked));
+    return input;
+  }
+
   function addDeleteButton(onDelete) {
     const row = document.createElement('div');
     row.className = 'se-actions';
@@ -132,7 +139,10 @@ const StyleEditor = (function () {
       case 'contour-polygon':
         show('Contorno de color (RGB)');
         addColorWheel(obj.color, c => obj.setColor(c));
-        addRange('Opacidad de relleno', 0, 1, 0.05, obj.fillOpacity, v => obj.setFillOpacity(v));
+        addCheckbox('Rellenar interior', obj.fillEnabled, checked => { obj.setFillEnabled(checked); showFor(record); });
+        if (obj.fillEnabled) {
+          addRange('Opacidad de relleno', 0, 1, 0.05, obj.fillOpacity, v => obj.setFillOpacity(v));
+        }
         addRow('<em style="font-size:11px;color:#555;">Incluye contorno negro fino exterior automático.</em>');
         addDeleteButton(() => { DrawTools.deleteSelected(); });
         break;

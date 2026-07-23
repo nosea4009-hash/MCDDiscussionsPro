@@ -5,6 +5,17 @@
 
 * { box-sizing: border-box; }
 
+:root {
+  /* Tema de color de la plantilla del panel SPC — customizable desde la
+     toolbar ("Tema del panel"). Los valores por defecto replican el clásico
+     blanco/negro/gris del SPC. */
+  --panel-bg: #ffffff;
+  --panel-text: #000000;
+  --panel-border: #000000;
+  --panel-border-soft: #999999;
+  --panel-accent-bg: #f6f6f6;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -57,6 +68,21 @@ html, body {
   gap: 3px;
   white-space: nowrap;
 }
+.tb-check input[type="color"] {
+  width: 24px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #555;
+  border-radius: 2px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.panel-custom-colors {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-custom-colors.hidden { display: none; }
 .draw-tools {
   border-left: 1px solid #444;
   border-right: 1px solid #444;
@@ -93,15 +119,16 @@ html, body {
 #spc-panel {
   width: 300px;
   min-width: 300px;
-  background: #ffffff;
-  border-right: 3px solid #000;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border-right: 3px solid var(--panel-border);
   overflow-y: auto;
   padding: 10px;
   font-size: 13px;
 }
 
 .panel-header-row {
-  border-bottom: 2px solid #000;
+  border-bottom: 2px solid var(--panel-border);
   padding-bottom: 6px;
   margin-bottom: 6px;
 }
@@ -113,26 +140,26 @@ html, body {
   font-weight: bold;
   line-height: 1.05;
   font-family: Arial, Helvetica, sans-serif;
-  color: #000;
+  color: var(--panel-text);
 }
 .mcd-number-row {
   font-size: 20px;
   font-weight: bold;
   margin-top: 4px;
-  color: #000;
+  color: var(--panel-text);
 }
 
 .panel-valid-row {
   font-size: 13px;
   font-weight: bold;
-  border-bottom: 1px solid #999;
+  border-bottom: 1px solid var(--panel-border-soft);
   padding-bottom: 6px;
   margin-bottom: 6px;
 }
 
 .panel-concerning {
   margin-bottom: 6px;
-  border-bottom: 1px solid #999;
+  border-bottom: 1px solid var(--panel-border-soft);
   padding-bottom: 6px;
 }
 .pc-label {
@@ -147,10 +174,10 @@ html, body {
   text-align: center;
   font-weight: bold;
   font-size: 14px;
-  border: 2px solid #000;
+  border: 2px solid var(--panel-border);
   padding: 5px;
   margin-bottom: 4px;
-  background: #f6f6f6;
+  background: var(--panel-accent-bg);
 }
 .panel-watch-prob-row {
   text-align: center;
@@ -162,7 +189,7 @@ html, body {
 .panel-section-title {
   font-weight: bold;
   font-size: 13px;
-  border-bottom: 2px solid #000;
+  border-bottom: 2px solid var(--panel-border);
   margin: 10px 0 4px 0;
   padding-bottom: 2px;
 }
@@ -174,14 +201,14 @@ html, body {
   margin-bottom: 4px;
 }
 .peak-table td {
-  border: 1px solid #333;
+  border: 1px solid var(--panel-border);
   padding: 3px 5px;
 }
 .pi-label { font-weight: bold; width: 30%; }
 .pi-swatch {
   width: 40px;
   cursor: pointer;
-  border: 1px solid #000 !important;
+  border: 1px solid var(--panel-border) !important;
 }
 .pi-value { width: 45%; }
 
@@ -194,7 +221,7 @@ html, body {
 .pi-max-gradient {
   flex: 1;
   height: 10px;
-  border: 1px solid #000;
+  border: 1px solid var(--panel-border);
   background: linear-gradient(to right, #fff9b0, #ffcc00, #ff6600, #ff0000, #8b0000);
 }
 .pi-max-text {
@@ -212,7 +239,7 @@ html, body {
 }
 
 #miniMapContainer {
-  border: 2px solid #000;
+  border: 2px solid var(--panel-border);
   margin-top: 4px;
   margin-bottom: 10px;
   height: 160px;
@@ -401,4 +428,64 @@ html, body {
 /* Mini map inset overlay rectangle */
 .mm-extent-rect {
   fill: none;
+}
+
+/* ============ METAR / Station model plots (SMN) ============ */
+.metar-icon { pointer-events: auto; }
+.metar-plot {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 2px #fff;
+}
+.metar-temp {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  color: #c00000;
+}
+.metar-dew {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  color: #007a1a;
+}
+.metar-pres {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  color: #333;
+  font-size: 9.5px;
+}
+.metar-wspd {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  color: #0050b3;
+}
+.metar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.metar-arrow {
+  font-size: 16px;
+  line-height: 1;
+  color: #000;
+}
+.metar-calm {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid #000;
+  border-radius: 50%;
 }

@@ -32,6 +32,26 @@
       </select>
       <label class="tb-check"><input type="checkbox" id="toggleProvincias" checked> Límites provinciales</label>
       <label class="tb-check"><input type="checkbox" id="toggleDepartamentos" checked> Límites departamentales</label>
+      <label class="tb-check"><input type="checkbox" id="toggleRutas"> Rutas nacionales</label>
+      <span id="roadsColorControls" class="panel-custom-colors hidden">
+        <label class="tb-check">Color ruta <input type="color" id="roadColorInput" value="#b45300"></label>
+        <label class="tb-check">Contorno <input type="color" id="roadCasingColorInput" value="#000000"></label>
+      </span>
+    </div>
+
+    <div class="toolbar-group">
+      <label class="tb-label">Tema del panel:</label>
+      <select id="panelThemeSelect">
+        <option value="classic" selected>Clásico (blanco/negro)</option>
+        <option value="dark">Oscuro (gris/blanco)</option>
+        <option value="navy">Azul marino</option>
+        <option value="custom">Personalizado…</option>
+      </select>
+      <span id="panelCustomColors" class="panel-custom-colors hidden">
+        <label class="tb-check">Fondo <input type="color" id="panelBgColor" value="#ffffff"></label>
+        <label class="tb-check">Texto <input type="color" id="panelTextColor" value="#000000"></label>
+        <label class="tb-check">Bordes <input type="color" id="panelBorderColor" value="#000000"></label>
+      </span>
     </div>
 
     <div class="toolbar-group draw-tools">
@@ -52,6 +72,11 @@
       <button class="tb-btn" id="btnSelect" title="Seleccionar / Editar">↖ Editar</button>
       <button class="tb-btn danger" id="btnDelete" title="Eliminar elemento seleccionado">🗑 Borrar</button>
       <button class="tb-btn" id="btnClearAll">Limpiar Todo</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tb-btn" id="btnLoadMetar" title="Cargar observaciones de superficie (METAR/SMN) en el mapa">🌡 Cargar METAR/SMN</button>
+      <button class="tb-btn" id="btnClearMetar" title="Quitar observaciones de superficie del mapa">✕ Quitar METAR</button>
     </div>
 
     <div class="toolbar-group">
@@ -177,14 +202,18 @@ Granizo muy grande y tornados serán posibles.</div>
 <script src="https://unpkg.com/leaflet.pattern@0.1.0/dist/leaflet.pattern.js"></script>
 <script src="https://unpkg.com/@jaames/iro@5/dist/iro.min.js"></script>
 <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <script src="js/basemaps.js"></script>
 <script src="js/boundaries.js"></script>
+<script src="js/roads.js"></script>
+<script src="js/metar.js"></script>
 <script src="js/symbols.js"></script>
 <script src="js/styleeditor.js"></script>
 <script src="js/drawtools.js"></script>
 <script src="js/floatingbox.js"></script>
 <script src="js/panel.js"></script>
+<script src="js/paneltheme.js"></script>
 <script src="js/minimap.js"></script>
 <script src="js/export.js"></script>
 <script src="js/main.js"></script>
